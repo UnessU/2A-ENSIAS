@@ -1,0 +1,22 @@
+connect sys/oracle as sysdba;
+set echo off;
+CREATE TABLE frag21(a NUMBER)
+ TABLESPACE data02;
+
+CREATE TABLE frag22(a NUMBER)
+ TABLESPACE data02;
+
+CREATE TABLE frag23(a NUMBER)
+ TABLESPACE data02;
+
+CREATE TABLE frag24(a NUMBER)
+ TABLESPACE data02;
+
+CREATE TABLE frag25(a NUMBER)
+ TABLESPACE data02;
+
+DROP TABLE frag21;
+DROP TABLE frag22;
+DROP TABLE frag23;
+DROP TABLE frag24;
+DROP TABLE frag25;

@@ -1,0 +1,9 @@
+Identifiez les fichiers et les Identifiez les fichiers et les blocs qui contiennent les lignes destinées à la table
+ORDERS.
+Indice : Interrogez la vue DBA_EXTENTS du dictionnaire de donnée
+SELECT file_id, block_id, blocks
+FROM dba_extents
+WHERE owner = 'SYSTEM'
+AND segment_name = 'ORDERS'
+AND segment_type = 'TABLE';
+

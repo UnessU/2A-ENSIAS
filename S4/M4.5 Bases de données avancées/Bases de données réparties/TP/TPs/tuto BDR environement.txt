@@ -1,0 +1,111 @@
+1) copier l Machine virtuelle li 3tana guermah fchi emplacement (a condition tkon khdama bien sur) dir fbalk bli had la machine raha distribution khassa b oracle smitha oracle linux donc lkhdma mbdla chwiya 3la les autres distributions (makaynch dik show addr ip ,ifconfig....)
+
+2)open les 2 VMs f vMware
+	2.1) 9bl matdir marche dir edit la machine wbdelliha le nom casa et l'autre rabat (bach matlfch wsf)
+
+
+--> implementer un reseau local entre les 2 machines, puisque vMware fih switch virt donc shalet l9adiya ma3lina ghi nconfigiriw les @ip alors
+
+	ensias1:le nom de l'instance				ensias2:le nom de l'instance
+	CASA :10.1.10.2/24                          RABAT:10.1.10.3/24
+
+								^^^^^^^^^^^^^^^^
+								||||||||||||||||
+
+pour notre cas le nom dyal les instances ghaykono b7al b7al : orcl ms lmtloub mn TP hadchi li lfo9 wakha hakak ghanedoha b7al kif tp alors:
+			
+3) configurer les @ip:
+	pour les 2 machines casa et rabat !!!!!!!!
+	--->switcher lmode root :la commande ==> su  ==> password:oracle
+	3.1)modifier @ip : 
+		3.1.1)fte7 lfichier
+		[root@pc152~$]# gedit /etc/sysconfig/network-scripts/ifcfg-eth0
+		3.1.2)modifier dikchi li tma wredo b7al haka
+
+			DEVICE=eth0
+			ONBOOT=yes
+			BOOTPROTO=static
+			NM_CONTROLLED="yes"
+			HWADDR=xxxxxxxxxxxx #khli hadak li kan fach ft7ti lfichier 
+			DEFROUTE=yes
+			PEERDNS=yes
+			IPV4_FAILURE_FATAL=yes
+			IPV6INIT=no
+			NAME="System eth0 1" #===> Smih li bghiti
+			IPADDR=10.1.10.2 #===> dir li bghiti dikchi dres ,2 machine casa .2 wrabat .3 matalan 
+			NETMASK=255.255.255.0 			
+			DNS1=8.8.8.8
+			DNS2=8.8.4.4
+	3.2)restart network
+		3.2.1) cd /etc/init.d
+		3.2.2) ./network restart
+	3.3) tester  la connexion :
+		 mnin tssali mnhom b2
+		 a partir mn casa dir :
+		 	 3.3.1)tester 3la rask : ping 10.1.10.2   => puis dirc ctrl+C w9ra wach kayn chi lost si oui rak ghletti 3awd
+		 	 3.3.2)tester la machine rabat: ping 10.1.10.3 => meme chose
+		 3awd mn rabat 2ila bghiti tye9en ms 2ila khdmatlk mn casa rah mn rabat khdama
+4) hna les cnx khdama bin les 2 machines :daba khssna nkhliw les 2 instances y3rfou b3diyathom hadchi khss ydar fles 2 machines!!!!!!!!
+	4.1)ghan ajoutew les hosts flfichier hosts: 
+			=>[root@pc152~$]# gedit /etc/hosts        wnredouh b7al haka
+		4.1.1)pour casa:
+			127.0.0.1 	localhost.localdomain		localhost		pc152
+			10.1.10.2	pc152.oracle.com 			pc152
+			10.1.10.3	rabat.oracle.com 			rabat
+		4.1.2)pour rabat:
+			127.0.0.1 	localhost.localdomain		localhost		pc152
+			10.1.10.3	pc152.oracle.com 			pc152
+			10.1.10.2	casa.oracle.com 			casa
+	4.2)ghan ajoutew les hosts flfichier tnsnames.ora: hada mno l'instance ghat3ref les hosts li t9der tcommunica m3ahom.
+		4.2.1)[root@pc152~$]# gedit /u01/app/oracle/product/11.2.0/dbhome_1/network/admin/tnsnames.ora 
+
+		4.2.2) pour casa : redouh b7al haka
+
+		ensias1 =
+ 			(DESCRIPTION =   				
+   				  (ADDRESS = (PROTOCOL = TCP)(HOST = pc152.oracle.com)(PORT = 1521))
+				 (CONNECT_DATA =
+				   (SERVICE_NAME = DEDICATED)
+				   (SERVICE_NAME=orcl.example.com)
+				 )
+			)
+		ensias2 =
+ 			(DESCRIPTION =   				
+   				  (ADDRESS = (PROTOCOL = TCP)(HOST = rabat.oracle.com)(PORT = 1521))
+				 (CONNECT_DATA =
+				   (SERVICE_NAME = DEDICATED)
+				   (SERVICE_NAME=orcl.example.com)
+				 )
+			)
+		4.2.2) pour rabat : redouh b7al haka
+		ensias2 =
+ 			(DESCRIPTION =   				
+   				  (ADDRESS = (PROTOCOL = TCP)(HOST = pc152.oracle.com)(PORT = 1521))
+				 (CONNECT_DATA =
+				   (SERVICE_NAME = DEDICATED)
+				   (SERVICE_NAME=orcl.example.com)
+				 )
+			)
+		ensias1 =
+ 			(DESCRIPTION =   				
+   				  (ADDRESS = (PROTOCOL = TCP)(HOST = casa.oracle.com)(PORT = 1521))
+				 (CONNECT_DATA =
+				   (SERVICE_NAME = DEDICATED)
+				   (SERVICE_NAME=orcl.example.com)
+				 )
+			)
+5)Bda tp
+5.1) creer l'envi + user + commencer TP
+	5.1.1) pour les 2 machines  <<<<<=====
+	 fla ligne de cammande:
+		[oracle@pc152~$]$ . oraenv    #===> selectionner l'env
+		=> ktb orcl
+		[oracle@pc152~$]$ sqlplus
+			=> username: sys as sysdba
+			=> mdp: oracle_4U
+		puis creation d'un utilisateur : dir li bghiti ms mn l27ssn dir nfss l user bach matlfch 
+			SQL> CREATE USER gl IDENTIFIED BY gl;
+			SQL> GRANT connect,resource to gl;
+			SQL> conn gl/gl
+	5.1.2) la prachaine fois fach tji dkhl wdir sqlplus dkhl user gl wpassword gl
+5.2) tconnecta l user gl f ensias1 li hiya CASA wbda TP rah kayna l corr f teams	

@@ -1,0 +1,50 @@
+1- 
+
+create type t_ecole as object(
+	list_classe t_list_classes --table imbriqué des references des objets t_class
+);
+
+
+create type t_class as object(
+	numero number(2),
+	nom varchar2(25),
+	ecole REF t_ecole,
+	list_eleve t_list_eleves, -- le nombre des eleves dans une classe est quelconque  -> table imbriqué des references des objets de type t_eleve
+	list_cours t_list_cours -- chaque classe suit un nombre de cours max 15 cours -> varray des ref des objets de type t_cours
+);
+
+create or replace table t_list_classes as table of ref t_class; --table imbriqué des ref des objets de type t_class 
+
+create type t_eleve as object(
+	numero number(2),
+	nom varchar2(25),
+	prenom varchar2(25),
+	classe REF t_class -- un eleve n'appartient qu'à une et une seule classe -> ref vers un objet de type t_class
+);
+
+create or replace type t_list_eleves as table of REF t_eleve;
+
+create type t_cours as object(
+	numero number(2),
+	intit varchar(25),
+	vh number(2),
+	list_classes t_list_classes, -- un cours peut être suivie par plusieurs/aucune classes -> table imbriqué des ref des objets de type t_class
+	list_prof t_list_prof -- un cours peut être assurè par plusieurs prof max 3, -> varray des ref des objets de type t_prof
+);
+
+create or replace type t_list_cours as varray(15) of ref t_cours;
+create or replace type t_list_prof as varray(3) of ref t_prof;
+create or replace type t_list_prof_cours as varray(5) of ref t_cours;
+
+create or replace type t_prof as object(
+	numero number(2),
+	nom varchar2(25),
+	prenom varchar2(25),
+	adresse varchar(75),
+	list_cours t_list_cours_prof -- chaque prof assure au max 5 cours -> varray des ref des objets de type t_cours
+);
+
+
+
+
+

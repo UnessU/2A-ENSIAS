@@ -1,0 +1,13 @@
+
+ETAPE 1:se connecter
+ETAPE 2: copier la mchine virtuelle Oracle fà partir de DATACENTRE
+ETAPE 3: INSTALLER LA MACHINE VIRTUELLE ORACLE
+ETAPE 4: CONFIGURER LE RESEAUX (INTEl ....)
+ETAPE 5: LANCER PL/SQL
+ETAPE 6: se connecter avec oulad/oulad/ensias1
+ETAPE 7: Créer un compte avec
+		create user zaatar identified by zaatar;
+ETAPE 8: se donner les droits
+	grant connect, resource to zaatar;
+ETAPE 9; se connecter avec son propre compte
+ETAPE 10: se concentrer sur son travail

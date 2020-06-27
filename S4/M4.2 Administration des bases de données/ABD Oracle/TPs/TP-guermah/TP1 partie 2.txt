@@ -1,0 +1,6 @@
+correction:
+ORACLE_HOME = [/home/oracle] ?
+/u01/app/oracle/product/11.2.0/dbhome_1
+au lieu de
+ORACLE_HOME = [/home/oracle] ?
+u01/app/oracle/product/11.2.0/dbhome_1

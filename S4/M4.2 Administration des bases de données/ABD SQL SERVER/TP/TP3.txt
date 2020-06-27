@@ -1,0 +1,2 @@
+
+delete groupe of users cmd line: net localgroup groupe1/DELETE

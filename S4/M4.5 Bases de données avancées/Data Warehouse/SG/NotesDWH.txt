@@ -1,0 +1,251 @@
+en étoile: ils ne respectent pas les 3FN, les données sont condensées dans une seule table.
+avantage : rapidité / défaut: stockage et redondance des données.
+
+
+en flocant: ils repectent les 3FN, ils distribue les données en plusieurs tables (ex: produit->typeProduit,CategorieProduit,SousCategorieProduit)
+avantage: clean (bien structuré),pas de redondance/ défaut: slow, ses requetes sont de grande complexité (complexité de quoi? -> complexité par rapport au temps (hadi kant sowlatni 3liha))
+
+Reporting: Le terme "Reporting" désigne une famille d'outils de Business intelligence destinés à assurer la réalisation, la publication et la diffusion de rapports d'activité selon un format prédéterminé.
+Ils sont essentiellement destinés à faciliter la communication de résultats chiffrés ou d'un suivi d'avancement.
+
+
+
+package contient des lots de transformation qui opèrent sur les mêmes fonctionnalités.
+
+
+Full(Alpha): kada5el donnée de9a wa7da
+Delta: slowly changing dimension, kol merra kantraitiw data li f transactionnel (d'une façon périodique)
+
+clé de substitution, pour l'historisation, clé b7al primaire ms kat3awed plusieurs fois.
+
+Datamart partie de la DW, Datamart concerne un sujet bien précis.
+OLAP : online analytical processing, les outils (applications) utilisés pour DW
+OLTP: online transaction processing, les outils utilisés pour la BD transactionnelles
+
+Slowly changing dimensions: pour l'historisation, c'est un mode de chargement de données en utilisant des clés de substitution.
+
+Gestionnaire de connexions: il nous permet d'effectuer l'ETL (Exctract Transform load)
+
+f la restitution des donnée mafahmhach mazyan mais je pense kayn fiha  deux axes, la créations des cubes b SSAS pour inspecter les données et  bach n projectiw les mesures 3la les plusieurs  axes wala dimensions, par rapport l nta chno baghi 
+et axe tani hwoa reporting à l'aide SSRS, kat7awal  transformer les donnée chargées f  tableau de bord, soit par des diagrammes ola des tableaux 
+
+kima galt nada OLE db wa7d l'api dartha microsoft pour acceder les bases de donnees sql server (cree avec SSMS) et les charger depuis les differents services b7a SSIS, SSAS ,..
+
+
+la restitution l9it bali hiya la représentation fidèle de quelque chose, donc ghaliban 9assdat biha les rapports qui donne une idee aala datamart chnou fiha 
+
+
+normalement galet la restitution b ssas o ssrs… o ssas hia li katcreer biha lcube o ssrs hia li katloadilih wahed rapport
+
+
+La table de faits et la table de dimensions sont utilisées pour créer des schémas. L’enregistrement d’une table de faits est une combinaison d’attributs de différentes tables de dimension.
+ La table des faits aide l’utilisateur à analyser les dimensions de l’entreprise, ce qui aide à prendre des décisions pour améliorer son activité. D’ailleurs, les tables de dimensions aident à rassembler les dimensions avec lesquels les mesures doivent être prises.
+
+
+Traçabilité: l'info sur ce qui a été fait et QUI l'a fait vs historisation: se concentre jsute sur ce qui a été fait.
+
+
+
+
+
+Data mart: c’est un entrepôt de données (appelé magasin de données)
+départemental orienté sur un problème spécifique. C’est une base de
+données orientée sujet mise à la disposition des utilisateurs dans un contexte
+décisionnel décentralisé
+
+
+
+
+
+Data warehouse
+ un système d’information dédié à la prise de décision
+ une collection de données
+ orientées sujet
+ Intégrées
+ non volatiles et historiées
+ organisées pour le support d’un processus d’aide à la décision
+
+
+
+Données historiées
+ L'historisation est nécessaire pour suivre dans le temps l'évolution des
+différentes valeurs des indicateurs à analyser (un référentiel temps
+associé aux données afin de permettre l'identification dans la durée de
+valeurs précises)
+
+
+
+
+
+Données non volatiles
+ Afin de conserver la traçabilité des informations et des décisions prises,
+les informations stockées au sein du data warehouse ne peuvent pas
+être supprimées
+ Une requête lancée à différentes dates sur les mêmes données doit
+toujours retourner les mêmes résultats
+
+
+
+
+
+
+Le data warehouse est une sorte de point focal stockant en un point unique
+toute l'information utile provenant des systèmes de production et des sources
+externes
+
+
+
+
+
+
+
+
+
+
+
+ Data marts
+ le data mart est un sous-ensemble d'un data warehouse contenant des
+données propres à un sujet ou à une activité d'entreprise, par exemple
+la finance ou l'analyse de la clientèle. Les data marts peuvent être
+conçus dans des bases de données relationnelles ou OLAP
+
+
+
+
+
+
+
+ Data warehouse
+ le data warehouse est défini comme l'union virtuelle de data marts et
+des informations intégrées qu'ils partagent
+ un data warehouse peut se définir comme une banque d'informations
+centralisée et intégrée fournissant des données aux data marts.
+
+
+
+
+
+
+
+ Schéma optimisé pour les requêtes des utilisateurs rapides
+ requêtes OLAP très rapides
+ utilisation plus interactive que les applications de création de rapport des
+Systèmes de Gestion de Bases de Données Relationnelles (SGBDR) classiques
+ stockage de plusieurs niveaux de données de synthèse dans les cubes OLAP
+ Puissant moteur de calcul pour l'analyse numérique
+ Les cubes OLAP servent à l'analyse numérique, depuis les simples rapports de
+vente aux algorithmes d'allocation complexes
+ Modèle de données intuitif et conceptuel
+ Plus qu'une technologie de base de données particulière, OLAP est un modèle de
+données intuitif et conceptuel
+ Affichage multidimensionnel des données
+ Le traitement OLAP permet de visualiser, d'analyser et de parcourir les données
+en toute souplesse (descendre, monter sur plusieurs niveaux, faire pivoter
+l’affichage des données)
+
+
+
+
+
+
+
+
+ Les Formes Normales (FN)
+ Première Forme Normale (1 FN): les tables sont bidimensionnelles, une
+seule valeur par cellule de données
+ Deuxième Forme Normale (2 FN): les colonnes (attributs) non-clé doivent
+dépendre intégralement de la clé primaire
+ Troisième Forme Normale (3 FN): les attributs ne dépendent pas des
+autres attributs présents dans cette table, ni dans aucune autre
+
+
+
+
+
+
+
+Pour faciliter l'extraction et l'analyse des données, un data
+warehouse organise les données en structures physiques
+aisément exploitables appelées schémas en étoile.
+ Un schéma en étoile se caractérise par une table de faits
+centrale entourée de plusieurs tables de dimension
+ Une table de faits contient des mesures qui décrivent des événements
+propres à l'entreprise. Elle peut également contenir des données
+agrégées.
+ Les pointes de l'étoile représentent les tables dimensionnelles et
+servent à décrire les informations liées à un processus d'entreprise précis
+et à donner un contexte aux données numériques
+
+
+
+
+
+Mesures
+Une mesure est une colonne numérique, quantitative, de la table de faits.
+Les mesures représentent généralement les valeurs analysées
+ Dans l'illustration précédente, les mesures de la table Faits-Ventes sont
+Quantité-Ventes (quantités vendues) et Montant-Ventes (montant ventes). Ces
+mesures englobent l'ensemble des dimensions.
+
+
+ Clés étrangères
+Une clé étrangère est la représentation de la clé principale d'une dimension
+dans une table de faits. L'association de ces clés correspond généralement
+à l'identificateur unique de chaque enregistrement de la table de faits.
+
+
+ Dans la diapositive, les clés étrangères sont représentées par les champs ID-
+Client (clé client), ID-Produit (clé produit), Id-Période (clé période), Id-Employé
+(clé employé), ID-Transporteur (clé transporteur)
+
+
+
+
+
+
+
+
+
+
+Mesures numériques
+Les mesures sont des valeurs ou des faits analysés par les utilisateurs. Les
+mesures d'un cube doivent provenir de la table de faits définie dans la base de
+données source étoile.
+
+
+
+Dimensions
+Les dimensions représentent des catégories d'entreprise qui fournissent un
+contexte aux mesures numériques. Elles sont l'équivalent logique des
+dimensions du schéma en étoile
+
+
+
+Cubes
+Les cubes associent toutes les dimensions et toutes les mesures dans un
+modèle conceptuel. Ils fonctionnent comme un support de stockage logique
+pour une base de données OLAP et sont manipulés par les utilisateurs qui
+souhaitent accéder à leurs données
+
+
+
+
+
+
+ Les performances des requêtes (temps nécessaire à un
+utilisateur pour accéder aux informations demandées) est
+le principal facteur déterminant à prendre en compte pour
+définir le mode de stockage des cubes de traitement
+analytique en ligne (OLAP, OnLine Analytical Processing).
+
+
+
+
+
+ Une conception optimale offre aux utilisateurs des requêtes
+rapides tout en conservant des temps raisonnables pour le
+traitement des cubes. La définition du mode de stockage et
+des agrégations est l'une des étapes les plus cruciales du
+développement des cubes
+
+
