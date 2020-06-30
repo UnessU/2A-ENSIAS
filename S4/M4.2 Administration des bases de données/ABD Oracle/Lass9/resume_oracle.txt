@@ -1,0 +1,599 @@
+﻿Role administrateur oracle :
+	* Rôle organisationnel 
+		- Définition du schéma conceptuel des données
+		-Décision de qui peut accéder à quoi et comment)
+
+	* Rôle technique (niveau interne)
+		- Installation du SGBD et les outils associés
+		- Création de la base de données et assurer son évolution 
+		- Gestion des privilèges d’accès 
+		- Amélioration des performances (implantation optimale) 
+		- Sécurité et cohérence des données 
+		- Echange de données entre la base et le monde extérieur
+
+Role du SGBD Oracle :
+	* Définition et manipulation des données (Langage SQL /PLSQL, Procedures, triggers)
+	* Integrite (contrainte du modele relationnel)
+	* Confidentialite (Privilège , Rôle , Vue )
+	* Gestion de la Concurrence d’accès
+	* Gestion des transactions
+	* SGBD à architecture ouverte 
+		- Portabilité d’Oracle (Puisqu'il est ecrit en c => Independence vis a vis de l'environnement d'execution)
+		- Compatibilité aux normes (SQL 92)
+		- Distributivité d’Oracle  (BD distribuee => Indépendance vis-à-vis du réseau de communication utilisé et de la localisation des données)
+
+Services proposes par les applications ORACLE :
+	* Service méthodologique (generation de code SQL : DDL)
+	* Service de développement d’applications (ORACLE FORMS/REPORT,....)
+	* Service d’aide à la décision 
+	* Services destinés aux administrateurs de bases de données 
+	* Service de communication (accès à une base de données depuis des applications clientes  , Outils permettant la répartition des données)
+
+Architecture ORACLE :
+	* Noyau
+		- fonctionnalites classiques : Gestion de l’intégrité et de la cohérence des données,  la confidentialité des données , sauvegarde et de restauration   ,accès concurrents 
+		- Autres fonctionnalites :  Optimisation de l’exécution des requêtes ,  Gestion des accélérateurs , Stockage physique des données
+	
+	* Dctionnaire de de données 
+		-  une base de données qui décrit de façon dynamique une base de données. Son contenu reflète l’image de la base à un instant donné(Objets de
+		 la BD,Utilisateur et privileges,  informations relatives à l’activité de la base de données (connexions, ressources utilisées, etc.))
+		- Le dictionnaire de données est manipulé avec le langage SQL 
+	
+	* SQL 
+		- Elle joue le rôle d’interface entre le noyau et les différents outils d’Oracle, Tout accès à la base de données est exprimé en SQL
+		- 1. Interprétation des commandes SQL
+		- 2. Vérification syntaxique et sémantique 
+		- 3. Décomposer les commandes en opérations élémentaires et les soumettre au noyau 
+		- 4. Récupération du résultat et le transmettre à l’application qui a soumis la commande 
+
+	* PLSQL 
+		-  SQL+ Structures de contrôle + Variables + Traitement des erreurs + Traitement des curseurs Oracle 
+
+	* Services oracle 
+		- Services cites auparavant
+
+Outils oracle :
+
+	* Outils de développement : 
+		--  SQL PLUS : interface interactive à SQL et PL/SQL 
+		-- Oracle Developer  : conception et création d’application clientserveur 
+		-- SQL*xxx : précompilateurs  (exemple : C + SQL => C + fonctions)
+		-- Oracle Forms /Reports/Graphics(definit des requetes qui generent des graphiques), Procedure builder ( gérer le code PL/SQL sur un serveur de bases de données)
+
+Composants d'une BD Oracle et instance
+    
+	* En generale :
+
+		** Des fichiers physiques stockés sur le serveur 
+		** Des processus (threads) chargés en mémoire sur le serveur 
+		** Des espaces mémoires sur le serveur appelé SGA et PGA (System Global Area) 
+
+	* EN detail :
+		** Base de donnees 
+			- fichiers de données  : Ils contiennent toutes les données de la base ( les structures logiques et physiques y sont stockées (tables, vues,...), et le dictionnaire de données), extension : .dbf
+			- Fichiers redo-log : Mémorisent l’historique de tous les ordres modifiant des données ou la structure de la base de données (LDD, LMD), Utilisés en cas de perte des fichiers DATABASE : .rdo, .log
+			- Fichiers de controle : Ils contiennent la description physique de la base (nom, chemin d’accès de chacun des fichiers, date et heure de création, information concernant la cohérence de la base, …) Obligatoire au moment du demarrage de la base de donnees.
+			- Fichiers d'administration :  Les fichiers servant à paramétrer certains outils, Les différents fichiers de trace et d’alerte générés par Oracle
+
+		** Instance :
+		    Type de data :
+		    	- User data  (Enregistrements)
+		    	- Meta data (Informations sur les donnees dispo dans le dictionnaire de donnees)
+		    Infos !!
+		    	- L'interet generale des buffers/cache c'est d'eviter les lectures disques qui consomment trop de temps, et utilises des lectures memoires a la place qui sont moins couteuses
+		    - Zone memoire PGA 
+			- Definition :
+		    	 	-- A PGA is a nonshared memory region that contains data and control information exclusively for use by an Oracle process
+		    - Example : 
+				-- Each time a cursor is executed, a new run-time area is created for that cursor in the PGA
+			
+			- Zone memoire SGA
+			- Definition :
+				-  Zone mémoire partagée par tous les utilisateurs Oracle (SGA),ensemble de buffers contenant des données utilisateurs et des données systèmes 
+				
+					-- Database Buffer cache (cache de blocks données manipulées)  
+						--- Sert a sauvegarder les blocks de donnees user utilises recemment (user data : enregistrements), ce qui fait gagner du temps lors du lancement d'une requete ou on a besoin des memes donnees a partir du disque
+					-- Redo Log Buffer (Cash de log)  
+						--- contient des informations relatives aux modifications apportées à la base de données , Toutes les données avant leurs mises à jour, toutes les modifications effectuées sur ces données, la trace de toutes les transactions validées ou non encore validées (Block de donnees anciens et nouveaux), ces operations sont faite par l'optimizer avant de verifier si les donnees de la requete sont deja dispo dans le Buffer cache 
+					--  (Shared pool/Zone partage), aussi utilise pour stocker des infos sur les objets de la DB et les droits et privileges des users + les infos du dictionnaire de donnees recemment utilisees (Un espace pour analyser et réutiliser les ordres SQL déjà exécutés), elle se compose de 2 parties 
+						--- Library cache 
+							---- Verification de la syntaxe par l'optimizer dans cette zone  et cela depuis le dictionnary cache, puis la compilation et la generation du plan d'execution
+							---- Si la requete a ete deja execute dans le Library cache, oracle ne perd pas son temps a la reexecuter
+						--- Dictionnary cache (Contient les Metadata, ces donnees sont utilise lors de l'analyse semantique d'une requete(tables, colonnes, droits d'acces) par l'optimizer)
+
+			- Zone memoire pour executer les programmes (processus)
+
+				-- Roles processus 
+					--- Exécuter les actions des applications
+					--- Echanger les données entre les mémoires de masse et la mémoire centrale )
+
+				-- Type processus 
+					--- Processus User (Créés une fois qu’un outil Oracle est lance, Une session utilisateur est une connexion à la base de données par l’intermédiaire d’un process User )
+					--- Processus SGBD : 
+						---- Process server : Prennent en charge les processus user (un pour chaque processus user)
+						---- Process en Background  
+							----- DBWR : Ecrit dans les fichiers Database les buffers de données modifiés par la SGA  
+							----- LGWR : Ecrit le Buffer Redo Log dans le fichier Redo Log en service (il existe un seul Buffer Redo Log) 
+						    ----- PMON (Process MONitor) : Assure le recouvrement des process utilisateurs en cas de problèmes, en libérant les ressources qui étaient utilisées par ces process (supprime le process en cours, annule les transactions non validées, libère les verrous et les ressources utilisées dans la SGA)
+						    ----- SMON (Systeme monitor) :  Rétablit la cohérence de la base après un incident 
+						    ----- ARCH (Archiver) :  Recopie les fichiers Redo Log une fois qu’ils ne sont plus en service sur un support d’archivage (atteint la taille maximale) 
+
+Gestion Instance :
+	* Admin users
+		- SYS et SYSTEM : sont crees automatiquement, possèdent le rôle DBA 
+	* Methode d'authentification
+		- authentificatio OS
+		- Fichier de mot de passe
+	* Fichier de parametres (Fichier d'initialisation): La qualité du fonctionnement de la BD dépend de la façon dont l’instance a été configurée, L’instance est configurée dynamiquement lors du démarrage par la lecture d’un fichier de paramètres  : INIT<SID>.ORA 
+
+	* Etat de base de donnees ORACLE 
+		- Base inexistante : La configuration de la nouvelle base est contenue dans le fichier d’initialisation , on doit demarrer l'instance
+		- Base non montée :  Les paramètres personnalisés sont lus et stockés en mémoire ,  mémoire définie dans le fichier d’initialisation est réservée , processus background demarre
+		- Base montee :  Les fichiers de contrôle sont lus ,  Etat permettant d’évaluer la cohérence de la base (test si la base peut s’ouvrir sans récupération des données) , sert a faire de la maintenance
+		- Base ouverte :  Les fichiers de données sont accessibles par les utilisateurs (fonctionnement normale d'une BD)
+		- Base fermee : Utile pour réaliser des sauvegardes complètes de la base de données , et modifier les parametres non dynamiques dans les fichiers de controle.
+
+	* Ouverture et fermeture de BD 
+		- 2 users qui ont droit  (SYSDBA, SYSOPER), authentification de 2 facons :
+			-- Auth OS : user doit appartenir a un groupe (ex : ORA_DBA  sur windows cree automatiquement), connection avec :  Connect / AS SYSDBA | SYSOPER 
+			-- Auth fichier de mot de passe :  ORAPWD FILE=nom PASSWORD=mot_de_passe ENTRIES=valeur  (ou ENTRIES est le nombre maximum d’utilisateurs qui pourront bénéficier du privilège SYSDBA ou SYSOPER ), Sous Windows, le fichier de mot de passe s’appelle PWD<SID>.ORA
+		
+		- Ouverture de la BD 
+			-- STARTUP [FORCE][RESTRICT] [PFILE=fichier d’initialisation] {[OPEN] |[RECOVER]|[MOUNT]|[NOMOUNT]};   
+				---  FORCE : ferme la BD avec l’option ABORT puis l’ouvrir ( à n’utiliser qu’en cas de force majeure) 
+				---  RESTRICT : Seuls les utilisateurs ayant le privilège RESTRICT SESSION peuvent accéder à la base. Option utilisée en cas d’exportation des données  (éviter la modification des données) 
+				---  PFILE : permet de spécifier l’emplacement du fichier de paramètres à utiliser pour démarrer l’instance
+				---  OPEN : permet le démarrage de l’instance et l’ouverture de la base de données (mode par défaut) 
+				---  RECOVER : un recouvrement de la BD sera lancé avant l’ouverture de base 
+				---  MOUNT : permet de démarrer l’instance et de monter la base de données. Nécessité d’utiliser la commande « ALTER DATABASE OPEN » pour ouvrir la base 
+				---  NOMOUNT : Permet le démarrage de l’instance.  Pour monter et ouvrir la base, il faut utiliser les commandes : « ALTER DATABASE MOUNT » puis « ALTER DATABASE OPEN »  
+		
+		- Fermeture de la BD
+			-- Etapes de fermetures 
+				--- Les données stockées dans la SGA sont enregistrées sur le disque
+				--- Fermeture des fichiers de données
+				--- Démontage de la base en fermant les fichiers de contrôle
+				--- Arrêt de l’instance en restituant la mémoire au système d’exploitation et en terminant ses processus
+			-- Syntaxe : SHUTDOWN  [ABORT | IMMEDIATE | NORMAL | TRANSACTIONNAL]; 
+				 --- ABORT : arrêt brutal sans enregistrement des données de la SGA  (fermeture en état incohérent)  => nécessite un recouvrement lors du prochain démarrage
+				 --- IMMEDIATE : Oracle n’accepte pas de nouvelles connexions, annule les transactions en cours des utilisateurs connectés, déconnecte ceux-ci puis ferme la base  (fermeture en état cohérent)
+				 --- NORMAL : Oracle n’accepte pas de nouvelles connexions, par contre il attend que tous les utilisateurs se déconnectent pour fermer la base (mode par défaut)
+				 --- TRANSACTIONNAL : Oracle n’accepte pas de nouvelles connexions, attend que tous les utilisateurs aient fini leurs transactions, puis les déconnecte ensuite ferme la base  (fermeture en état cohérent) 
+
+		- Lister les parametres 
+			-- SHOW PARAMETERS  dans SQL PLUS, ou select * from V$PARAMETER;
+		
+		- Type de parametre 
+			-- Parametres statiques : ne peuvent pas être modifiés dynamiquement : il faut modifier la valeur du paramètre dans le fichier de paramètres et redémarrer l’instance. 
+			-- Paramètres dynamiques : peuvent être modifiés alors que l’instance est en cours de fonctionnement par un ordre SQL ALTER SESSION (pour la session courante) ou par un ordre SQL ALTER SYSTEM (pour toute l’instance)
+		
+		- Si l’instance a démarré avec un fichier de paramètres serveur (SPFILE), l’ordre ALTER SYSTEM permet :
+			-- d’enregistrer la modification dynamique d’un paramètre conjointement dans le fichier de paramètres serveur
+			-- de modifier un paramètre dans le fichier de paramètres serveur sans modifier sa valeur dans l’instance (très utile pour les paramètres statiques) 
+			-- Synataxe : ALTER SYSTEM SET paramètre = valeur […] [ SCOPE = MEMORY | SPFILE | BOTH ] ;
+				---  MEMORY  : la modification concerne uniquement l’instance en cours 
+				---  SPFILE  : la modification concerne uniquement le fichier de paramètres serveur 
+				---  BOTH : la modification concerne l’instance en cours et le fichier de paramètres serveur
+			-- Exemples :
+				 --- ALTER SYSTEM SET DB_CACHE_SIZE= 20M ;  
+				 --- ALTER SESSION SET NLS_DATE_FORMAT = ‘DD/MM/YYYY’; 
+		
+		- Information session 
+			-- Se trouvent dans la vue dynamique V$SESSION , visible avec :  select sid, serial#, username, type, status from V$SESSION; 
+			--Exemples : 
+				---  ALTER SYSTEM KILL SESSION ‘14,5’ ; Où 14 est le SID et 5 est le SERIAL# 
+ 
+ * Creation de la base de donnees 
+
+ 	** Creation de variable d'environnement : 
+ 		-- ORACLE_HOME, ORACLE_SID, ORACLE_BASE, … 
+ 		-- Création du fichier de paramètres texte (PFILE) 
+ 			--- DB_Name :  Nom local de la base de données associé à l’instance 
+ 			--- DB_Domaine : Nom du domaine du réseau dans lequel la BD est créée => DB_Name.DB_Domaine : Nom global
+ 			--- DB_Block_Size : Taille en octets, du bloc de données, utilisé par défaut pour l’organisation des fichiers de données et du BUFFER CACHE(paramètre non modifiable après la création de la BD. Il doit être entre 2ko et 32Ko et doit être un multiple de la taille du bloc du SE) 
+ 			---  Control_Files : Nom ou liste des noms des fichiers de contrôle ainsi que leur localisation sur les disques du serveur. ce paramètre permet à Oracle de créer les fichiers de contrôle lors de la création de la BD. 
+ 			--- Log_Buffer : valeur en octets définissant la taille du REDO LOG BUFFER qui stocke en mémoire les entrées des journaux de reprise.
+ 			--- Shared_Pool_Size : valeur en octets définissant la taille de la Shared Pool.
+ 			--- SGA_Max_Size : Taille maximale de la SGA.  
+ 			--- Processes : Nombre de processus qui peuvent se connecter à l’instance au même moment (y compris les processus d’arrière-plan). 
+ 	
+ 	** Création du fichier de paramètres serveur (SPFILE) (Qui sera utilise durant le runtime)
+ 		-- Il a comme nom spfile<SID>.ora, le pfile avit (init<SID>.ora)
+ 		-- Syntaxe : CREATE SPFILE [ = ‘nom_spfile’ ] FROM PFILE  [ = ‘nom_pfile’ ]  ; 
+ 		-- Réciproquement, un fichier de paramètres serveur peut être réexporter au format texte par l’ordre SQL CREATE PFILE :
+ 			--- CREATE PFILE [ = ‘nom_pfile’ ] FROM SPFILE  [ = ‘nom_spfile’ ] ;
+ 		-- Creation de la base de donnees : 
+ 			-- Syntaxe :
+ 				--- CREATE DATABASE [nom_base] [CONTROLFILE REUSE] 
+ 				[DATAFILE spécification_fichier_data [,…] ]  [UNDO TABLESPACE nom  
+ 				[DATAFILE spécification_fichier_data [,…] ]  ] [DEFAULT TEMPORARY TABLESPACE nom 
+ 				[TEMPFILE spécification_fichier_data [,…] ] 
+ 				[ clause_gestion_extents] ] [LOGFILE [GROUP numéro] spécification_fichier_redo [, …]  ] [ARCHIVELOG | NOARCHIVELOG ] [MAXINSTANCES nombre] [MAXLOGFILES nombre] [MAXLOGMEMBERS nombre] [MAXDATAFILES nombre] [CHARACTER SET jeu] [NATIONAL CHARACTER SET jeu] [SET TIME_ZONE = ‘+|- hh:mi’ ]  ; 
+
+ 			-- Spécification_fichier_data   :  ‘nom_fichier’ [SIZE valeur [K|M]   ]  [clause_auto_extend] 
+ 				--- Clause_auto_extend  :: AUTOEXTEND { OFF | ON [ NEXT valeur [K|M]  ] [ MAXSIZE UNLIMITED  |  valeur [K|M]   ]  } 
+ 			-- Spécification_fichier_redo   :: (‘nom_fichier’  [, …]) [SIZE valeur [K|M] ] 
+ 			-- CONTROLFILE REUSE  : Réutilise les fichiers de contrôles existants
+ 				--- Le fichier de données contenant les tables du dictionnaire de données est créé et affecté par Oracle au tablespace SYSTEM créé  automatiquement par Oracle lors de l’exécution de la commande CREATE DATABASE    =>   il faut au moins créer un fichier de données (clause DATAFILE)
+ 			-- UNDO TABLESPACE : permet de définir les caractéristiques du tablespace utilisé pour les segments d’annulation 
+ 			-- DEFAULT TEMPORARY TABLESPACE : permet de définir les caractéristiques du tablespace temporaire par défaut, Les journaux de reprise sont créés à partir des spécifications données après la clause LOGFILE. Il faut au moins créer deux journaux.  Il est possible de créer des groupes de journaux de reprise qui seront multiplexés. 
+ 			-- ARCHIVELOG ou NOARCHIVELOG indique si la nouvelle BD fonctionne avec archivage des journaux ou non. 
+ 			--  MAXINSTANCES  : nombre maximum d’instance associées à la BD.   
+ 			-- MAXLOGFILES : nombre maximum de groupes de journaux de reprise 
+ 			-- MAXLOGMEMBERS : nombre maximum de membres par groupe de journaux de reprise 
+ 			-- MAXDATAFILES : nombre maximum de fichiers de données pour la BD
+ 			-- CHARACTER SET et NTIONAL CHARACTER SET : permet de définir le code des caractères dans lesquels seront stockées les données 
+ 			-- SET TIME_ZONE  : permet de définir le fuseau horaire de la BD 
+
+ 		-- la commande CREATE DATABASE permet aussi de créer deux utilisateurs SYS et SYSTEM. Elle exécute aussi le script SQL.BSQ permettant de créer les tables du dictionnaire de données. À la fin, il monte la base et l’ouvre.   
+
+ 		-- Exemple : 
+ 			CREATE DATABASE biblio DATAFILE ‘c:\oracle\oradata\biblio\system01.bdf’ SIZE 100M          AUTOEXTEND ON NEXT 10M 
+ 			LOGFILE  
+ 			GROUP 1  (‘c:\oracle\oradata\biblio\redo01a.log’,                                     ‘c:\oracle\oradata\biblio\redo01b.log’)  SIZE  20M, 
+ 			GROUP 2  (‘c:\oracle\oradata\biblio\redo02a.log’,                                     ‘c:\oracle\oradata\biblio\redo02b.log’)  SIZE  20M, 
+ 			GROUP 3  (‘c:\oracle\oradata\biblio\redo03a.log’,                                     ‘c:\oracle\oradata\biblio\redo03b.log’)  SIZE  20M 
+ 			UNDO TABLESPACE undotbs          
+ 				DATAFILE ‘c:\oracle\oradata\biblio\undotbs01.bdf’ SIZE 100M        
+ 				AUTOEXTEND ON NEXT 10M MAXSIZE 1024M 
+ 			DEFAULT TEMPORARY TABLESPACE temp          
+ 				TEMPFILE ‘c:\oracle\oradata\biblio\temp01.bdf’ SIZE 100M          
+ 				AUTOEXTEND ON NEXT 10M MAXSIZE 1024M 
+ 				NOARCHIVELOG 
+ 				CHARACTER SET WE8ISO8859P1      --jeu de caractères principal 
+ 				NATIONAL CHARACTER SET UTF8      --jeu de caractères secondaire 
+ 				SET TIME_ZONE  =  ‘+OO:OO’
+ 				 MAXINSTANCES   1 
+ 				 MAXLOGFILES     8 
+ 				 MAXLOGMEMBERS    4 
+ 				 MAXDATAFILES      128 
+
+ 	** Création des vues du dictionnaire de données 
+ 		-- À travers le compte SYS, il faut exécuter le script CATALOG.SQL localisé dans le répertoire ADMIN de ORACLE_HOME/RDBMS 
+ 		Ce script crée plusieurs types de vues en plus de celles dynamiques commençant par V$. Ces vues sont préfixées en fonction de leur accès et des informations qu’elles contiennent : 
+ 			---  USER_  : donnent des informations sur les objets appartenant à l’utilisateur connecté 
+ 			 --- ALL_  : donnent des informations sur les objets auxquels a accès l’utilisateur connecté
+ 			 --- DBA_  : donnent des informations sur tous les objets de la base                                  (accessibles seulement pour les utilisateurs ayant le rôle                                SELECT_CATALOG_ROLE ou le privilège SELECT ANY                                DICTIONNARY) 
+ 		--  Création des packages contenant des procédures et des fonctions facilitant la maintenance de la BD, il faut exécuter le script CATPROC.SQL
+
+ 	** Exemple script (page 76)
+
+ 	Tablespace 
+ 		- Unite logique utilise pour regrouper un groupe d'objets logiques (tables, vues, sequences ,.... ) 
+ 		- Chaque objet logique doit être associé à un et un seul tablespace 
+ 		- Chaque tablespace est identifié par un nom et lui sont associés un ensemble de fichiers 
+ 		- Facilite par exemple les opérations de sauvegarde et de restauration des données
+ 		- Un tablespace peut être supprimé même s’il contient des données 
+ 		- Une BD doit avoir au moins un tablespace appelé SYSTEM qui contient le dictionnaire de données et un deuxième pour stocker les objets de la base 
+ 		-  Deux états :        
+ 			--  Activé (online)                            
+ 			-- Désactivé (offline)  Rq : Le tablespace SYSTEM ne peut jamais être désactivé 
+
+ 		* Comment decider du nombre de tablespace utilise 
+ 			-- Performance : répartir les fichiers de la base de données sur différents disques a une effet sur la performance
+ 			-- Organisation : 
+ 				---  Faciliter les opérations de maintenance
+ 				--- Gérer des données utilisées pour des applications différentes dans une seule base de données 
+ 				---  Spécialiser des tablespces pour des tâches techniques interne à Oracle 
+ 		* Syntaxe 
+ 			-- CREATE TABLESPACE nom 
+ 			   DATAFILE spécification_fichier_data [,…] 
+ 			   [MINIMUM EXTENT valeur [K|M] ] 
+ 		       [ONLINE | OFFLINE] [PERMANENT | TEMPORARY] 
+ 		 	   [DEFAULT clause_stockage] 
+ 			   [BLOCKSIZE valeur [k]]; 
+
+ 			-- Clause_stockage ::           
+ 			STORAGE (    [INITIAL valeur [k|M] ]                                 
+ 			[NEXT valeur [k|M] ]                                 
+ 			[MINEXTENTS  valeur ]                                 
+ 			[MAXEXTENTS {valeur | UNLIMITED }]                                
+ 			 [PCTINCREASE valeur ] )
+
+ 			--  MINIMUM  EXTENT  : indique que les extensions allouées pour les segments de ce tablespace seront au moins de la valeur de cette option ou de son multiple. 
+ 			-- ONLINE  : les utilisateurs ont accès aux objets du tablespace. 
+ 
+			--  OFFLINE  : les utilisateurs n’ont pas accès aux objets du tablespace. 
+ 
+			--  PERMANENT  : Ce tablespace peut contenir des objets permanents et des segments temporaires (valeur par défaut). 
+ 
+			--  TEMPORARY  : Ce tablespace ne peut contenir que des segments temporaires. 
+ 
+			--  INITIAL  : Taille de la première extension lors de la création du segment dans le tablespace (par défaut = 5 block de données). 
+ 
+			--  NEXT  : Taille de la deuxième extension, lorsque la première est utilisée (par défaut = 5 blocks de données). 
+
+			-- PCTINCREASE  : Pourcentage d’augmentation de la taille de l’extension à partir de la troisième (par défaut = 50).
+
+			--  MINEXTENTS  : Nombre d’extensions affectées au segment lors de sa création (par défaut = 1). 
+ 
+			--  MAXEXTENTS  : Nombre maximum  d’extensions qui peuvent être créées pour le segment (valeur par défaut = 121). 
+
+			-- Remarque :  les options de stockage par défaut s’appliquent à tous les nouveaux  objets créés dans le tablespace dont l’option de stockage n’a pas été renseignée. 
+
+			Exemple :
+
+				-- CREATE TABLESPACE app_data 
+					DATAFILE ‘c:\oracle\oradata\BIBLIO\data01.dbf’ SIZE 20M,‘d:\oracle\oradata\BIBLIO\data02.dbf’ SIZE 10M          
+					AUTOEXTEND ON NEXT 5M MAXSIZE 50M MINIMUM EXTENT 150K
+					ONLINE; 
+
+			 -- Création d’un tablespace temporaire
+			 	---- Exemple:
+			 		----- CREATE TEMPORARY TABLESPACE app_temp 
+			 				TEMPFILE ‘c:\oracle\oradata\BIBLIO\temp01.dbf’ SIZE 20M       
+			 				AUTOEXTEND ON NEXT 5M MAXSIZE 50M;
+  
+			 -- Modification d’un tablespace
+
+			 	---- Remarque :  Seuls les nouveaux objets pour lesquels aucun type de stockage n’a été défini seront concernés par ce nouveau stockage par défaut. 
+
+			 	---- Exemple 
+			 		ALTER TABLESPACE app_data      
+			 			ADD DATAFILE ‘f:\oracle\oradata\Biblio\data03.DBF’ SIZE 40M AUTOEXTEND ON NEXT 5M MAXSIZE 80M; 
+
+			 		ALTER DATABASE     
+			 			DATAFILE ‘c:\oracle\oradata\Biblio\data01.DBF’ RESIZE 30M; 
+
+			 		ALTER TABLESPACE app_data     
+			 		ONLINE; 
+
+			 		ALTER TABLESPACE app_data     
+			 		OFFLINE; 
+
+			 		ALTER TABLESPACE nom  
+			 		READ ONLY; 
+
+			 		ALTER TABLESPACE app_data     
+			 		READ WRITE;
+
+			 		ALTER TABLESPACE app_data  DEFAULT STORAGE (INITIAL 256k NEXT 256k PCTINCREASE 25); 
+
+			 		DROP TABLESPACE  app_data INCLUDING CONTENTS AND DATAFILES  CASCADE CONSTRAINTS ; 
+
+* Déplacer un fichier de données :
+	- CONNECT / AS SYSDBA
+	- SHUTDOWN IMMEDIATE 
+	- HOST move c:\oracle\oradata\Biblio\data01.dbf d:\oracle\oradata\Biblio\data01.dbf 
+	- STARTUP MOUNT
+	- ALTER DATABASE RENAME FILE ‘c:\oracle\oradata\Biblio\data01.dbf’ TO  ‘d:\oracle\oradata\Biblio\data01.dbf’;
+	- ALTER DATABASE OPEN; 
+
+* Creation de tables :
+
+	-- PCTFREE  : Free space in a data block, By default, its value is 10. The statement "PCTFREE is set as 10" means that 10% space would be kept free in all data blocks in the table for its future growth
+
+	-- CREATE TABLE employees( empno NUMBER(4),  last_name VARCHAR2(30) deptno NUMBER(2)) 
+	   PCTFREE 20 PCTUSED 50 
+	   STORAGE(INITIAL 200K NEXT 200K PCTINCREASE 0  MAXEXTENTS 50) 
+	   TABLESPACE data01
+	   AS SELECT * FROM scott.employees; 
+
+	-- DROP TABLE scott.departments CASCADE CONSTRAINTS; 
+
+	-- Allocation manuelle d'extent :
+		ALTER TABLE scott.employees ALLOCATE EXTENT(SIZE 500K DATAFILE ‘/DISK3/DATA01.DBF’)
+
+    -- The analyze command can validate that tables and indexes are in sync with each other. 
+    	ANALYZE TABLE scott.employees VALIDATE STRUCTURE; 
+
+    ** Classification des Index
+    	 -- Logique
+    	 	--- Colonne unique ou concaténée
+    	 	--- Unique ou non unique 
+    	 -- Physique
+    	 	--- Partitionné ou non partitionné
+    	 	--- Organisé en B-tree ou bitmap
+
+    ** Creation d'index organisee en BTREE
+    	-- CREATE INDEX scott.emp_lname_idx 
+    	ON scott.employees(last_name) 
+    	PCTFREE 30 STORAGE(INITIAL 200K NEXT 200K PCTINCREASE 0  MAXEXTENTS 50) 
+    	TABLESPACE indx01;
+
+    ** Creation d'index a cles inverse
+    	-- CREATE UNIQUE INDEX scott.ord_ord_no_idx 
+    	ON scott.ord(ord_no) REVERSE 
+    	PCTFREE 30 STORAGE(INITIAL 200K NEXT 200K PCTINCREASE 0  MAXEXTENTS 50) 
+    	TABLESPACE indx01;
+
+    ** CREATE BITMAP INDEX scott.ord_region_id_idx 
+       ON scott.ord(region_id) PCTFREE 30 STORAGE(INITIAL 200K NEXT 200K PCTINCREASE 0  MAXEXTENTS 50) 
+       TABLESPACE indx01; 
+
+    ** Allocation ou Désallocation d'un Espace d’Index 
+    	-- ALTER INDEX scott.ord_region_id_idx ALLOCATE EXTENT (SIZE 200K DATAFILE ‘/DISK6/indx01.dbf’); 
+    	-- ALTER INDEX scott.ord_ord_no_idx DEALLOCATE UNUSED; 
+    ** Reconstitution d’Index  (Deplacememnt vers un nouveau tablespace)
+    	-- ALTER INDEX scott.ord_region_id_idx REBUILD TABLESPACE indx02; 
+    ** Vérification de la Validité de l'Index 
+    	-- ANALYZE INDEX scott.ord_region_id_idx VALIDATE STRUCTURE; 
+    ** Suppression d'Index 
+    	-- DROP INDEX scott.dept_dname_idx; 
+
+    ** Definition des contraintes lors de la creation des tables
+    	By default constraints are created as NON DEFERRABLE but this can be overidden using the DEFERRABLE keyword, A deferred constraint is only checked at the point the transaction is commited.
+
+    	-- CREATE TABLE scott.employees( empno NUMBER(4)    
+    		CONSTRAINT emp_pk PRIMARY KEY   
+    		DEFERRABLE    USING INDEX     STORAGE(INITIAL 100K NEXT 100K)     
+    		TABLESPACE indx01,  last_name VARCHAR2(30)    
+    		CONSTRAINT emp_ln_nn NOT NULL, deptno NUMBER(2)) TABLESPACE data01; 
+
+    	-- ALTER TABLE scott.departments DISABLE CONSTRAINT dept_pk CASCADE; 
+
+    	-- ENABLE VALIDATE is the same as ENABLE. The constraint is checked and is guaranteed to hold for all rows.
+		-- ENABLE NOVALIDATE means the constraint is checked for new or modified rows, but existing data may violate the constraint.
+		-- DISABLE NOVALIDATE is the same as DISABLE. The constraint is not checked so data may violate the constraint.
+		-- DISABLE VALIDATE means the constraint is not checked but disallows any modification of the constrained columns.
+	** Supprimez une table et toute clé étrangère la désignant à l'aide de cette commande : 
+		-- DROP TABLE departments CASCADE CONSTRAINTS; 
+
+	** Triggers 
+	 -- ALTER TRIGGER scott.emp_conv_ln DISABLE; 
+	 -- ALTER TABLE scott.employees ENABLE ALL TRIGGERS; 
+	 -- ALTER TABLE scott.employees DROP CONSTRAINT emp_ln_uk; 
+	 -- DROP TRIGGER scott.audit_dept;
+
+* Gestion des utilisateurs
+
+	** Liste de Contrôle pour la Création d’Utilisateurs :
+		-- Choisissez un nom d’utilisateur et un mécanisme d’authentification 
+		-- Identifiez les tablespaces dans lesquels l’utilisateur doit stocker des objets 
+		-- Décidez des quotas pour chaque tablespace 
+		-- Affectez un tablespace par défaut et un tablespace temporaire 
+		-- Créez un utilisateur 
+		-- Accordez des privilèges et des rôles à l’utilisateur 
+
+	** Definition du mot de passe initial 
+
+		-- CREATE USER Mohamed 
+		   IDENTIFIED BY ensias1 DEFAULT TABLESPACE data01 
+		   TEMPORARY TABLESPACE temp 
+		   QUOTA 15M ON data01  
+	       PASSWORD EXPIRE; 
+
+		-- ALTER USER Mohamed IDENTIFIED BY ensias2 PASSWORD EXPIRE;
+
+		-- ALTER USER Mohamed QUOTA 30M ON data01;
+
+		-- DROP USER Mohammed;
+
+		-- Utilisez la clause CASCADE si le schéma contient des objets :
+
+			--- DROP USER Mohamed CASCADE; 
+
+		-- Utilisez le mot-clé EXPIRE pour obliger les utilisateurs à réinitialiser leur mot de passe
+		-- utilisez QUOTA UNLIMITED avec précautions 
+
+* Gestion des profils 
+
+	* Definition 
+		-- Sont des ensembles nommés de limites de ressources et de mots de passe 
+
+	- Sont affectés aux utilisateurs par la commande CREATE/ALTER USER 
+	- Peuvent être activés ou désactivés
+	- Peuvent limiter les ressources du système au niveau de la session ou de l’appel  
+
+	** Création d’un Profil : Limite de Ressources 
+
+		CREATE PROFILE MonProfil LIMIT 
+		SESSIONS_PER_USER 2 
+		CPU_PER_SESSION 10000 
+		IDLE_TIME 60 
+		CONNECT_TIME 480; 
+
+	** Affectation de Profils à un Utilisateur 
+
+		-- CREATE USER user3 IDENTIFIED BY user3 
+		DEFAULT TABLESPACE data01 
+		TEMPORARY TABLESPACE temp 
+		QUOTA UNLIMITED ON data01  
+		PROFILE MonProfil; 
+
+		-- ALTER USER scott  PROFILE MonProfil;
+
+	** Activation des Limites de Ressources 
+		-- ALTER SYSTEM SET RESOURCE_LIMIT=TRUE;
+
+	** Modification d’un Profil 
+		-- ALTER PROFILE default LIMIT 
+		SESSIONS_PER_USER 5 
+		CPU_PER_CALL 3600 
+		IDLE_TIME 30; 
+
+		-- DROP PROFILE MonProfil
+
+		-- DROP PROFILE MonProfil CASCADE; 	
+
+	** Dans DBA_PROFILES : type_ressource peut etre PASSWORD
+
+	** Gestion des Privilèges 
+		-- types de privilèges :
+			- SYSTEME : permet aux utilisateurs d’effectuer des opérations particulières dans la base de données
+			- OBJET : permet aux utilisateurs d’accéder à un objet particulier et de le manipuler 
+		-- Privileges systeme :
+			- Il existe environ 80 privilèges système
+			- Le mot-clé ANY dans les privilèges signifie que les utilisateurs possèdent ce privilège dans tous les schémas  
+			- La commande GRANT ajoute un privilège à un utilisateur ou un groupe d’utilisateurs 
+			- La commande REVOKE supprime les privilèges 
+
+	** Attribution de Privilèges Système 
+		- GRANT CREATE SESSION, CREATE TABLE TO user1; 
+		- GRANT CREATE SESSION TO scott  WITH ADMIN OPTION; 
+
+	** Révocation des Privilèges Système 
+		
+		- REVOKE CREATE TABLE FROM user1;
+		- REVOKE CREATE SESSION FROM scott; 
+
+	** Attribution de Privilèges Objet
+
+		- GRANT EXECUTE ON dbms_pipe TO public; 
+		- GRANT UPDATE(ename,sal) ON emp TO user1 WITH GRANT OPTION; 
+
+	** Révocation des Privilèges Objet 
+
+		- REVOKE execute ON dbms_pipe FROM scott;
+		- 
+
+	**  WITH GRANT OPTION 
+
+		- Si on fait with grant option, le user ayant ete "GRANTED" peut attribuer un privilege a d'autres USER
+		- Une fois on fait REVOKE sur un privilege a un user qui a WITH GRANT OPTION, tous les users ayant pris le privilege du user ayant WITH OPTION veroont le privilege en question leurs desattribue.
+
+	** Gestion des Rôles
+
+		*** Avantages des Rôles :
+			- Gestion simplifiée des privilèges
+			- Gestion dynamique des privilèges 
+			- Disponibilité sélective des privilèges 
+			- Privilèges accordés au moyen de l’OS 
+			- Pas de suppression de privilèges en cascade 
+			- Performances améliorées 
+
+		*** Creation des role
+
+			- CREATE ROLE sales_clerk; 
+			- CREATE ROLE hr_clerk IDENTIFIED BY bonus; 
+				-- This example creates therole called hr_clerk, but now it is password protected with the password of bonus
+			- CREATE ROLE hr_manager IDENTIFIED EXTERNALLY; 
+				-- you create database accounts that must be authenticated by the operating system or network service
+			- ALTER ROLE sales_clerk  IDENTIFIED BY commission; 
+			- ALTER ROLE hr_clerk IDENTIFIED EXTERNALLY; 
+			- ALTER ROLE hr_manager NOT IDENTIFIED; 
+			- GRANT sales_clerk TO scott;
+			- GRANT hr_manager TO scott WITH ADMIN OPTION; 
+			- ALTER USER scott DEFAULT ROLE hr_clerk, sales_clerk; 
+			- ALTER USER scott DEFAULT ROLE ALL;
+			- ALTER USER scott DEFAULT ROLE ALL EXCEPT hr_clerk; 
+			- ALTER USER scott DEFAULT ROLE NONE; 
+
+			 - La commande SET ROLE active et désactive les rôles  
+			 - Les rôles par défaut d’un utilisateur sont activés à la connexion 
+			 - Un mot de passe est parfois exigé pour activer un rôle 
+
+			- SET ROLE sales_clerk IDENTIFIED BY commission; 
+			- SET ROLE ALL EXCEPT sales_clerk; 
+			- SET ROLE hr_clerk; 
+			- SET ROLE NONE; 
+
+			- REVOKE sales_clerk FROM scott; 
+			- REVOKE hr_manager FROM PUBLIC; 
+			- DROP ROLE hr_manager;
+
+		** Affectation de privilege aux roles
+
+			Syntaxe :
+				GRANT privileges ON object TO role_name
+
+			Exemples :
+				GRANT select, insert, update, delete ON suppliers TO test_role;
+				GRANT all ON suppliers TO test_role;
+
+				REVOKE delete ON suppliers FROM test_role;
+				REVOKE all ON suppliers FROM test_role;
+
+				GRANT execute ON Find_Value TO test_role;
+					-- grant EXECUTE privileges on a function or procedure to a role in Oracle.
+
