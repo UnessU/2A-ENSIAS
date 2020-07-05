@@ -1,0 +1,167 @@
+
+
+-------------------------------------------------------------------------------------------------------------------------------------------------------------
+------------------------------------------------------------------ADMINISTRATIONN ORACLE---------------------------------------------------------------------
+-------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+Chapitre 0: Introduction 
+1.Définitions
+a) Base de données
+--Une base est un ensemble organisé
+--Une base de données est un ensemble de données organisé en vue de son utilisation par des programmes qui correspondent à des applications distinctes de manière à faciliter l'évolution indépendante des données.
+b) SGBD
+--Un SGBD pour Système de Gestion de Bases de Données est une application qui permet de gérer une ou plusieurs bases de données.
+Exemples: Oracle, MySQL, MongoDB, MariaDB, Postgre, Microsoft Access
+2.SGBD Oracle
+Nous allons travailler avec Oracle Database 11g 
+a) Outils d'administration 
+--outils d'administration graphique: Oracle Entreprise Manager, Toad, ...
+--outils d'administration en ligne de commandes: sqlplus
+b) DBA1 vs DBA2
+En 1A, nous avons étudier Oracle en tant que "utilisateur". Maintenant, nous l'étudierons en tant qu'administrateur.
+*utilisateur: 
+--créer/modifier/supprimer une BD
+--créer/modifier/supprimer une table
+--insérer/mettre à jour/supprimer un enregistrement
+*administrateur: 
+--gérer les utilisateurs
+--réserver l'espace mémoire requis pour la BD
+--démarrer/sauvergarder/contrôler/dépanner/auditer/sécuriser/arrêter
+--octroyer les rôles
+
+c) Connexion au SGBD Oracle
+--connexion locale:
+1M: sqlplus nomUtilisateur/motPasse
+2M: sqlplus
+	nomUtilisateur
+	motPasse
+3M: connect nomUtilisateur/motPasse
+--connexion à distance:
+sqlplus nomUtilisateur/motPasse @IP:port
+Exemples:
+sqlplus hr/hr
+sqlplus hr/hr as sysdba
+slqplus scott/tiger
+sqlplus scott/tiger as sysdba
+sqlplus / as sysdba
+sqlplus / nolog
+d) Architecture Client/Serveur
+Le SGBD est hebergé dans le serveur. Puisque c'est une application, alors elle a un numéro de port par défaut. Dans le cas d'Oracle, 1521 et l'applciatif se trouve dans le repertoire /bin.
+La BD "orcl" contient les schémas=utilisateurs=compte=owner par défaut tels que hr/hr, scott/tiger, sys/PwdSys, system
+Les tables qu'on crée se trouvent dans la BD "orcl".
+Exemples de Client: SLQPLUS, Java, OEM
+
+
+Chapitre 1: Architecture et gestion d'instance
+1. Principe de localité
+Le principe de localité stipule que <<si on a eu a touché à un fichier, il y'a de forte chance qu'on le réutilise donc il reste chargé en mémoire RAM>>. Il a deux aspects à savoir:
+--le principe de localité temporel: LRU, LFU,...
+--le principe de localité spatial: notion de blocs
+2. Données plus valide
+Une donnée valide est une donnée qui est vue par les autres utilisateurs indépendamment de la session. Plusieurs cas que nous verons en TP peuvent se poser.
+D'une part, nous avons des données sur le segment ROLLBACK, tampon data et le disque dur (dbf).
+L'accès disque dur prend du temps et consomme de l'énergie. Pour se faire, on reduit l'accès disque: les données modifiéesrestent chargées en mémoire et ne sont valides qu'après une instruction qui fait soit un COMMIT implite ou exmplicite, généralement les instructions qui agissent sur la structure même de la base de données: create, drop, alter, rename, troncate, commit, disconnect,...
+
+3. Notions de transaction
+Une transaction est un ensemble d'instructions qui s'exécutent toutes à la fois ou pas. On parle du principe de tout ou rien ou de ça passe ou ça casse.
+Exemple: Lors d'un transfert d'une somme d'un compte A vers un compte B, il est obligatoire de déclarer les traitements d'envoi et de recpetion comme des blocs atomiques pour éviter les surprises qui peuvent advenir en cas d'echec d'envoi. C'st tout l'intérêt de PL/SQL.
+BEGIN
+	blcoc d'instructions A;
+	bloc d'instructions B
+END
+
+Il est à remarque que Oracle place un verrou par enregistrement permettant d'empêcher la modification d'une donnée déjà en cours de modification
+--Notions d'instance
+Une instance est une zone mémoire SGA et des processus d'arières plan du côté du serveur.
+
+4. Etapes d'exécution d'une requête SELECT
+select* from scott.emp;
+
+1E: le parsage
+	0E: génerer le condenser et le comparer à celui contenu dans la librairie de cache
+		SI identique ALORS
+			pas de compilation de la requête, alle à END
+		SINON 
+			compilation de la requête, aller à 1E
+	1E: vérifier l'existence de l'objet
+	2E: vérifier qu'on a le droit d'accès à cet objet
+	3E: générer le plan d'exécution de la requête
+2E: l'exécution
+	1E: rechercher le result_set dans le tampon data
+	2E: charger les données à afficher du disque dur vers le tampon data
+3E: le fetch
+	retourner la réponse aux client
+
+
+5) Etapes d'exécution de la requête UPDATE
+update scott.emp
+set ename="Nanamou"
+where id=1;
+
+1E: le parsage
+	0E: générer le condenser et le comparer à celui de la librairie cache
+		SI identique ALORS
+			pas de compilation
+		SINON
+			1E: compiler la requête
+			2E: vérifier l'existence de l'objet
+			3E: vérifier qu'on a le droit d'accès à cet objet
+			4E: génerer le plan d'exécution 
+2E: l'exécution
+	1E: rechercher le data à modifier dans la librairie cache
+	2E: garder une copie avant modification 
+	3E: modifier la donnée et par la suite la placer dans le dictionnary cache
+	4E: le vecteur changement sera stocké dans le tampon log
+
+
+6. Structure de données Oracle
+Une BD est un ensmble de tablespace.
+Un tablespace est un ensemble de segments
+un segment est un ensemble d'extends
+un extend est un ensemble de blocs contigûs
+le bloc est l'unité élémentaire d'Oracle. Sa taille par défaut est de 8Ko.
+
+
+Chapitre 2: Contrôle de la BD
+1. Contrôle de démarrage de la BD
+Le démarrage de la BD Oracle se fait par niveau.
+2. Contrôle d'arrêt de la BD
+L'arrêt de la BD Oracle se fait par niveau
+
+les options de la commande shutdown:
+-abort
+-normal
+-transactional
+-immediate*
+
+						abort		normal		transactional		immediate
+nouvelle Connexion 		  x			  x 			 x 					x
+
+transaction 			  x			  v 			 v 					x
+
+fermeture propre 		  x			  v 			 v 					v
+
+
+
+
+
+
+++Le segment ROLLBACK se trouve sur le tablespace undo
+++On peut avoir des données non valides sur le disque dur lorsque la mémoire est pleine 
+++Le SMON se charge du nettoyage en cas de crache du système. Il vérifie que le *dbf est synchronisé avec le *log
+++Le PMON se charge du nettoyage en cas de crache d'un processus utilisateur
+
+
+
+
+arrêt: oracle non disponible, instance non démarrée, oracle not avaliable, instance inactive
+mount: instance demarrée, instance active
+nomount: BD en mode maintenance, BD fermée
+open: BD démarrée
+
+startup force read only= retrait brusque pendant que la BD est impropre et PMON n'a pas la main pour écrire
+
+
+startup force= shutdown abort+startup
+
+startup force read only ne marchera pas car on a le système va cracher et donc la BD sera incohérente mais le PMON censé s'en charger ne peut pas écrire

@@ -1,0 +1,6 @@
+Diagramme de contexte
+Diagramme de cas d'utilisation
+Description textuelle
+Diagramme d'activité
+Diagramme de séquence
+Diagramme de classesazz

@@ -1,0 +1,30 @@
+https://waytolearnx.com/2018/08/qcm-oracle-bases-de-donnees-et-instances.html
+
+https://quizlet.com/52138275/chapter-4-creating-an-oracle-database-flash-cards/
+
+
+https://www.pearsonitcertification.com/articles/article.aspx?p=350920&seqNum=5
+
+
+https://www.studyblue.com/notes/note/n/oracle-sample-questions/deck/12808879
+
+
+https://www.studyblue.com/notes/note/n/oracle-sample-questions/deck/12808879
+
+
+
+
+To create a database, in what mode must the instance be?
+What files are created by the CREATE DATABASE command?
+When a session changes data, where does the change get written?
+If a tablespace is created with this syntax:create tablespace tbs1 datafile 'tbs1.dbf' size 10m;which of these characteristics will it have? (Choose all correct answers.)
+You issue this statement:audit select on hr.emp by access;but when you issue the command:select * from hr.emp where employee_id=0;no audit record is generated. Why might this be?
+The AWR is located in the SYSAUX tablespace. If you suspect that it is growing to such a size that it will fill the SYSAUX tablespace, what actions could you take to reduce the likelihood of this happening?
+The AWR is located in the SYSAUX tablespace. If you suspect that it is growing to such a size that it will fill the SYSAUX tablespace, what actions could you take to reduce the likelihood of this happening?
+
+
+
+
+
+
+

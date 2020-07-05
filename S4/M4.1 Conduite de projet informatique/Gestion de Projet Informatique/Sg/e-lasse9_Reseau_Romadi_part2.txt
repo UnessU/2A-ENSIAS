@@ -1,0 +1,60 @@
+﻿
+
+Chapitre 1: Les équipements de séurité réseau
+
+A--Les firewalls
+	1-Définition
+		Un firewall ou pare-feu est un équipement de sécurité réseau qui permet de faire respecter la politique de sécurité du réseau en définissant les types de communication autorisés sur le réseau.
+
+	2-Types de firewalls
+		a-firewalls sans état
+		b-firewalls avec état
+		c-firewall applicatif
+		d-firewall personnel
+
+	3-Cas d'études: firewall de linux: NETFILTER (outil de gestion: iptables)
+		a-Installation de l'outil de gestion: iptables
+			$sudo apt-get install iptables
+
+		b-Les tables de iptables
+			+la table filter qui contient les règles de filtrage:
+				les chaines: 
+					[-A | -I | -D | -R | -F ] INPUT
+					[-A | -I | -D | -R | -F ] OUTPUT
+					[-A | -I | -D | -R | -F ] FORWARD
+				les targets:
+					-j ACCEPT
+					-j REJECT
+					-j DROP
+					-j ANY
+
+			+la table nat qui permet la translation @IP et port:
+				les chaines:
+					[-A | -I | -D | -R | -F ] PREROUTING
+					[-A | -I | -D | -R | -F ] POSTROUTING
+				les targets:
+					-j SNAT
+					-j DNAT
+					-j MASQUERADE
+			+la table mangle qui permet la modification des paquets:
+			
+		c-Les principales options de iptables
+			-L : afficher les chaines
+			--line-numbers: afficher le numéro de la règle ---> $iptables -L -t filter --line-numbers
+			-t [filter | nat | mangle] : préciser la table concernée
+			-p: protocole
+			-sport: port source
+			-dport: port destination
+			-i: interface source
+			-o: interface destination
+			-s: @IP source
+			-d:@IP destination
+			-P: policy ou politique par défaut
+
+		-d Exercices
+
+		
+
+
+	
+	
