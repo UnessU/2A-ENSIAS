@@ -1,0 +1,340 @@
+MSSQLSERVER : Instance cree par defaut 
+
+Composant instance :
+	- Moteur SQL Server : qui nous permet de faire la Gestion et execution des transactions SQL (Modification, insertion, ....)
+	- SQL Server agent : qui nous permet de faire la planification des taches
+	- CLR (Machine virtuelle DotNet)
+	- Service Broker (Intermediaire entre users et moteur SQL SERVER , gerer les differentes transactions venant des differents Users)
+	- BD Users
+	- BD systemes (Master, Tempdbmodel, msdb)
+
+- Il y'a les services qui peuvent etre aplliques sur les instances (SSIS, SSAS, SSRS)
+
+- Bases de donnees systeme :
+	- Master : Contient l'integralite des informations systemes relatives a un systeme SQL SERVER (Users, tables, ......)
+	- MSDB : Utilise par l'agent SQL SERVER pour planifier des alertes et des travaux
+	- Model : Modele ou pattern initial pour toutes les bases de donnees crees sur une instance SQL SERVER
+	- TempDb :  Bases de donnees temporaire (indexes virtuelles, .....), Cree lors d'une connection SQL SERVER et detruite apres deconnection , dispo pour tous les users connectes  
+
+- Vue d'ensemble :
+	- .mdf (Master data file) : 
+		- fichiers de donnees primaire/principal contenant les informations dedemarrage de base de donnees, il pointe vers les fichiers de la BD.
+		- Objets de donnees user peuvant etre stockes dans ce fichier ou dans un fichier de donnees secondaire
+		- Extension peur etre modifiees , mais non recommandees
+
+	- .ndf (Next data file): 
+		- fichier secondaire/facultatif , decide par l'admin
+		- generalement les donnees sont dans ce fichier et les infos dans le fichier primaire
+		- fichiers secondaires peuvent etre utilises pour repartirles donnees sur plusieurs disques (pplusieurs fichiers secondaires sur multiple disques tous reference depuis le fichier .mdf)
+		- Extension peut etre modifiees , mais non recommandees
+
+	- .ldf (log datafile) : 
+		- Pour la journalisation (logfile), contient les infos du journal utilises pour la restauration de la base de donnees.
+		- Chaque base de donnees doit posseder au moins un fichier journal
+		- Extension peut etre modifiees , mais non recommandees
+
+* structures du fichier de donnees (.mdf) :
+	- Le fichier est constitue d'extensions (1,2,..n), extension est de taille 64 ko, puisque chqueextensions est constitue de 8 pages de ko, cette structure est utilisee  pour avoir une rapidite de lecture et d'ecriture.
+
+* Collation : choix de comportement avec le jeu de caractere
+
+* Creer la base de donnees avec TRANSACT-SQL :
+	
+	CREATE DATABASE Exemple
+	ON PRIMARY
+	(
+	NAME = 'EXEMPLE1',
+	FILENAME = 'C:\MSSQL\DATA\EXEMPLE.mdf',
+	MAXSIZE = '307200KB',
+	FILEGROWTH = 1024KB
+	)
+	,
+	()
+	.
+	.
+	,
+	LOG ON 
+	(
+	NAME = 'exemple_log',
+	FILENAME = 'C:\.........\exemple_log.ldf'),
+	MAXSIZE = 307200KB,
+	SIZE = 1024KB , FILEGROWTH = 10%
+	);
+
+	* Ajout d'un fichier secondaire :
+
+		- ALTER DATABASE Exemple 
+		 ADD FILE 
+		 (
+		 NAME= "",
+		 FILENAME = "",
+		 SIZE = ,
+		 FILEGROWTH = )";
+
+* Ajout d'un fichier de journalisation :
+
+		- - ALTER DATABASE Exemple 
+		 ADD LOG FILE 
+		 (
+		 NAME= "",
+		 FILENAME = "",
+		 SIZE = ,
+		 FILEGROWTH = )";
+
+* Modification de fichier :
+
+	- ALTER DATABASE Exemple 
+		 MODIFY FILE 
+		 (
+		 NAME= "OLD_NAME",
+		 NEWNAME = "NEW_NAME",
+		 ,......)";
+
+* suppression des fichiers :
+	- ALTER DATABASE Exemple
+	  REMOVE FILE logfile (c'est le nom logique)
+
+	- Les fichiers supprimables sont (fichiers secondaires, et de journalisation nouvellement crees)
+
+* Groupes de fichier :
+	- Collection de fichiers de donnees nommees 
+	- Groupe de fichiers primaires : automatiquement crees et contient le fichier principal
+
+* Creation de groupes de fichiers et ajout de fichiers dans le groupe
+	- ALTER DATABASE Exemple
+	  ADD FILEGROUP [Groupe1]
+
+	- ALTER DATABASE Exemple 
+		 ADD LOG FILE 
+		 (
+		 NAME= "",
+		 FILENAME = "",
+		 SIZE = ,
+		 FILEGROWTH = )
+		 TO FILEGROUP [Groupe1]
+
+* Creation d'un objet dans un groupe :
+
+	CREATE TABLE TABLE_1(
+	nomChamp nchar(10)) ON [PRIMARY]
+
+	   - Les fichiers sont distribues selon un pourcentages sur les differents fichiers de donnees
+
+* Sauvegarde :
+	- Pourquoi : 
+		- Panne materiel
+		- Erreurs utilisateurs
+		- Copie d'un serveur vers un autre
+
+	- Types de sauvegarde :
+		- Sauvegarde complete :
+			- Sauvegarde de l'integralite de la base de donnees
+			- Sauvegarde comprend une partie du journal des transactions (pour etre recuperable)
+		- Sauvegarde differentielle
+			- Se base sur la derniere sauvegarde complete (changement depuis cette sauvegarde), pour minimiser le temps
+		- Sauvegarde partielle
+		- Sauvegardede journal de transaction
+		- Sauvegarde de groupe de fichiers 
+
+* Mise en miroir et repartition:
+
+	- Mise en miroir: Permet de dupliquer la sauvegarde sur plusieurs supports pour minimiser les risques (copie de la sauvegarde)
+	- Repartition de donnees permet d'utiliser plusieurs supports pour la meme sauvegarde complete.
+	- Unite logique : utilsier un nom logique au lieur d'utiliser un chemin physique lors de la sauvegarde
+
+* Syntaxe Backup et autres:
+	
+	-- Sauvegarde complete :
+
+	BACKUP DATABASE Exemple
+	TO DISK = 'C":\Backup\....\example.bak'
+	WITH
+	FORMAT,             <=> veut dire qu'un nouveau fichier de sauvegarde 					est cree (non utilisation des extensions)
+
+	CHEKSUM,            <=> verifie les pages endommages   
+	INIT,               <=> initialise les entetes des fichiers
+	COMPRESSION        
+			 <=> active explicitement la compressions des sauvegardes
+
+	* Mise en miroir :
+
+		TO DISK = 'C:\Backup\....\example.bak' MIRROR TO DISK = 'C..\example.bak'
+
+
+	* Repartition :
+		TO DISK = 'C":\Backup\....\example1.bak', DISK = 'C":\Backup\....\example2.bak'
+
+    * Unite logique 
+    	MIRROR TO Unite1
+
+    -- Sauvegarde Differentielle
+    (Mais on doit avoir une sauvegarde complete au prealable)
+
+    BACKUP DATABASE Exemple
+	TO DISK = 'C":\Backup\....\example.bak'
+	WITH
+	DIFFERENTIEL
+
+	-- Sauvegarde de journal de transaction :
+		(Mais on doit avoir une sauvegarde complete au prealable)
+
+		- A la difference de la sauvegarde differentiel , si des sauvegardes differentielles sont deja cree il se base sur eux ou sur les sauvegardes de journaux deja crees, sinon sur la sauvegarde comple 
+		- Rq : sauvegarde differentielle se base tjrs sur la complete au contraire des sauvegardes de journaux de transactions
+
+		-- Syntaxe :
+
+			BACKUP LOG [EXEMPLE]
+			TO DISK = N'C:\Ex.bak'
+
+
+- Verifier integrite :
+	DBCC CHECKDB
+
+- Verifier sauvegarde :
+	restore verifyonly from disk = 'chemin'
+
+- Verifier entete de sauvegarde :
+	restore HEADERONLY FROM DISK = 'chemin'
+
+- Verifier fichier de sauvegarder :
+	RESTORE FILELIST ONLY FROM DISK = 'chemin'
+
+* Restoration de base de donnees (Sauvegarde complete):
+    - Premierement deconnecter les users :
+    	ALTER DATABASE [test] SET SINGLE_USER WITH ROLLBACK IMMEDIATE
+    - Donc on fait :
+	
+	  Use [master]  
+	  ALTER DATABASE [test] SET SINGLE_USER WITH ROLLBACK IMMEDIATE
+	  RESTORE DATABASE [test]
+	  FROM DISK = N'C:\......\...bak'
+	  WITH FILE = 1,
+	  REPLACE        //Remplacer la base de donnees existante
+	  GO
+
+	  ALTER DATABASE [test] SET MULTI_USER     // Restaurer les users
+
+* Restauration de sauvegarde differentiel :
+    - En prenmier on doit faire un backup du log en faisant (le temps ou il n'y'a pas eu de sauvegarde) : obligatoire
+
+    	BACKUP LOG [test] To [testUnit]
+    	WITH NOFORMAT,
+    	NORECOVERY
+
+	- En deuxieme place on doit faire une restauration complete
+
+	  RESTORE DATABASE [test]
+	  FROM DISK = N'C:\......\...bak'
+	  WITH FILE = 1
+	  NORECOVERY   \\pour ne pas monter la base de donnees
+
+	 - puis la restauration differentiel
+
+	  RESTORE DATABASE [test]
+	  FROM [testUnite]
+	  WITH FILE = 2
+
+	  (we haven't used NORECOVERY to make the database visible) 
+
+	  ALTER DATABASE [test] SET MULTI_USER     // Restaurer les users
+
+* Le fichier de journalisation :
+
+	Contient des lignes : chaque ligne a un id(LSN), chaque ligne contient les operations logiques effectue (insertion,modification,..) et les images avan/apres (exemple valeur avant et valeur apres)
+
+	* Montrer les donnees du fichier log :
+
+		- select * from fn_dblog(null,null);
+
+	* Fonctionnement : 
+		1)- Source (Application, interface ,...)
+		2)- transaction
+		3)- les transactions sont faite dans le cache (mais les donnees sont recuperes de la base de donnees (fichiers de donnees))
+		- Par processus SQL SERVER :
+		4)- checkpoint avant d'ecrire dans le log
+		5)- Ecriture/synchronisation avec la base de donnees en se basant sur le checkpoint  
+
+* Rsetauration d'une sauvegarde de journal de transaction 
+ - Restauration complete
+ - restauration differentielle
+ - reastauration de journal de transaction avant celui ci
+
+ ces restaurations avec NORECOVERY comme avant
+
+  RESTORE LOG [test] FROM [testUnit] WITH FILE = 2
+
+ * Administration de taches administratives :
+ Agent SQL-Server : composant qui donne la possibilite d'automatiser des taches par des notions comme (les jobs, les alertes,...), il travaille avec la base de donnees pour assurer ces differents tahes
+
+ 	Objets SQL SERVER AGENT : 
+
+ 		- Job/travail :
+
+ 		suite d'actions effectuer par SS Agent, travaux utiliser pour definir une tache administrative 1 ou plusieurs fois
+ 		- et cela en fonction de :
+ 			- planification
+ 			- alerte
+ 			- ou par la procedure stocke sp_start_job
+
+ 		- Contient plusieurs ou une etape etapes (script)
+ 		- Execution :
+ 			EXEC msdb.dbo.sp_start_job 'Job1'
+
+ 		- Operateurs :
+
+ 		Personne responsable de la maintenance d'une instance ou plusieurs, possible qu'il soit alertes des notifications
+
+ 		- Alerte :
+
+ 			Definition :
+ 				Reponse automatique a un event donne
+
+ 			Reponse a :
+ 				- evenement
+ 				- Performance
+
+ 			Destine a un :
+ 				- prevenir operateur
+ 				- executer travail
+
+ 		- Planification :
+ 			- Par date ou autre
+ 			- et puis on peut associer un job a cette planification 
+
+
+
+ * Partie RAID (Redundant Array of independent disks (RAID))
+ 	- Regroupement redondant de disques independants
+
+ 	- constituer une unite de stockage (appelle grappe) a partir de plusieurs disques dures
+
+ 	- Ameliorer la performance, la securite ou la tolerance aux pannes	
+
+ 	- Types :
+ 		- RAID 0 (Volume agreges par bandes "stripping"):  
+ 			- distribution de donneess d'un meme fichier sur plusieurs disques
+ 			- ameliore les perfs de lecture/ecriture puisqu'on peut utiliser le parallelisme
+ 			- par contre , puisqu'on a un assemblage en serie la perte d'un seul disque entrane la perte de toute les donnees
+
+ 		- RAID 1 (disque en mirroir "mirroring")
+ 			- consiste en l'utilisation de plusieurs disques redondants, chaque disque contient les memes donnees
+ 			- exriture simultannees sur la grappe
+ 			- de facon que les disques soit interchangeable a tout moment
+ 			- augmente la isponibilite de donnees
+ 			- Si un disque est deffectueux , le controleur RAID desactive le disque defaillant, une fois remplace le controlleur RAID reconstitue le mirroir
+
+ 		- RAID 5 (Volume agrege par bande a parite repartie)
+ 			- chaque bande est constitue d'un bloc de donnees et d'un bloc de parite
+ 			- au cas de defaillance de l'un des disques , il manquera soit un bloc de donnees ou de parite, si c'est un bloc de parite c'est pas grave car les donnees sont tjrs dispo, si c'est un bloc de donnees on peut calculer son contenu a partir des autres blocs de donnees et de parite
+ 			- Raid ne supporte la perte que d'un disque a la fois
+ 			- avantages operation de lecture (parallelisme), mais en ecriture on a une lenteur a cause du calcul de parite.
+
+ 		- RAID 10 (1 + 0)
+ 			- Zones de mirroring distincte comme dans RAID 1 , et dans chaque zone les disque seront relies par stripping comme en RAID 0
+ 			- Avec cette operation il est possible de perdre jusqu'a 3 disques en meme temps et ca ne pose aucun probleme
+ 			- Excellent niveau de perf en lecture et ecriture
+ 			
+ 		- RAID 50 (5 + 0)
+ 			- RAID 0 puis RAID 5
+
+
